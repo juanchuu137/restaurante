@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: RestauranteApi
+  datasource:
+    url: ${SUPABASE_DB_URL:jdbc:postgresql://db.pdvcqrvgqlvondifioas.supabase.co:5432/postgres}
+    username: ${SUPABASE_DB_USERNAME:postgres}
+    password: ${SUPABASE_DB_PASSWORD:LMkh684WymLV3t&}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+supabase:
+  jwt:
+    secret: ${SUPABASE_JWT_SECRET:Eao/Oy/U/QpCEBPhngpVRB+NDKdX/ao+Ydf6A6dxGZqlPiP7Laopa4qfRdj+IxZvrjBTcTLO9OWN74kyZANEog==}
