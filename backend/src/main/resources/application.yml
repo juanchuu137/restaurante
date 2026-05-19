@@ -1,4 +1,6 @@
 spring:
+  server:
+    port: 8080
   application:
     name: RestauranteApi
   datasource:
@@ -14,6 +16,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
-supabase:
+app:
   jwt:
-    secret: ${SUPABASE_JWT_SECRET:Eao/Oy/U/QpCEBPhngpVRB+NDKdX/ao+Ydf6A6dxGZqlPiP7Laopa4qfRdj+IxZvrjBTcTLO9OWN74kyZANEog==}
+    # Secret de al menos 32 caracteres para HMAC-SHA256.
+    # En producción, inyectar desde variable de entorno: APP_JWT_SECRET
+    secret: ${APP_JWT_SECRET:mi-secret-local-super-seguro-1234567890abcdef}
+    expiration-hours: ${APP_JWT_EXPIRATION_HOURS:24}

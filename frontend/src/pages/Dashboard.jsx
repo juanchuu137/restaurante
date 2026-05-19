@@ -1,16 +1,16 @@
 import { useAuth } from '../context/AuthContext'
-import { supabase } from '../services/supabaseClient'
 import { Navigate } from 'react-router-dom'
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
 
-  // if (!user) {
-  //   return <Navigate to="/login" replace />
-  // }
+  if (!user) {
+    return <Navigate to="/login" replace />
+  }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
+  // Si es admin, redirigir al panel de admin
+  if (user.rol === 'ADMIN') {
+    return <Navigate to="/admin" replace />
   }
 
   return (
@@ -19,9 +19,9 @@ export default function Dashboard() {
         <div className="logo">RestauranteApp</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <span style={{ fontSize: '0.9rem', color: '#555' }}>
-            Hola, <strong>{user ? (user.user_metadata?.nombre || user.email) : 'Invitado'}</strong>
+            Hola, <strong>{user.nombre || user.email}</strong>
           </span>
-          {user && <button onClick={handleLogout} className="btn btn-outline">Cerrar Sesión</button>}
+          <button onClick={logout} className="btn btn-outline">Cerrar Sesión</button>
         </div>
       </nav>
 

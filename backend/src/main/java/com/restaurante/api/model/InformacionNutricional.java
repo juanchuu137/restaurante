@@ -16,7 +16,8 @@ import java.util.UUID;
 public class InformacionNutricional {
 
     @Id
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @OneToOne(fetch = FetchType.LAZY)

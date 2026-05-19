@@ -16,7 +16,8 @@ import java.util.UUID;
 public class Producto {
 
     @Id
-    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id", nullable = false, updatable = false)
     private UUID id;
 
     @Column(name = "nombre")
@@ -24,6 +25,9 @@ public class Producto {
 
     @Column(name = "precio")
     private BigDecimal precio;
+
+    @Column(name = "stock")
+    private Integer stock;
 
     @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private InformacionNutricional informacionNutricional;

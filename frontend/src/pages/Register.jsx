@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { Link, Navigate } from 'react-router-dom'
 
@@ -7,57 +6,50 @@ export default function Register() {
   const [nombre, setNombre] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [peso, setPeso] = useState('')
+  const [estatura, setEstatura] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(false)
-  const { user } = useAuth()
+  const { user, registro } = useAuth()
 
-  const handleSignUp = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    setSuccess(false)
 
-    // Pasamos el "nombre" dentro de los metadatos de supabase (options.data)
-    // Así el Trigger de la base de datos podrá leerlo y guardarlo en la tabla 'cliente'.
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          nombre: nombre
-        }
-      }
-    })
-
-    if (error) {
-      setError(error.message)
-    } else {
-      setSuccess(true)
+    try {
+      await registro({
+        nombre,
+        email,
+        password,
+        peso: peso ? parseFloat(peso) : null,
+        estatura: estatura ? parseFloat(estatura) : null,
+      })
+    } catch (err) {
+      setError(err.message || 'Error al registrar la cuenta')
     }
     setLoading(false)
   }
 
-  // if (user) {
-  //   return <Navigate to="/dashboard" replace />
-  // }
+  // Si ya está logueado, redirigir según rol
+  if (user) {
+    if (user.rol === 'ADMIN') {
+      return <Navigate to="/admin" replace />
+    }
+    return <Navigate to="/dashboard" replace />
+  }
 
   return (
     <div className="page-wrapper">
       <div className="glass-container">
-        <h2 className="text-center">Crear una Cuenta</h2>
-        <p className="text-center text-light mb-6">Únete a nuestro restaurante para hacer pedidos</p>
+        <h2 className="text-center">Crear Cuenta</h2>
+        <p className="text-center text-light mb-6">Regístrate para comenzar a ordenar</p>
 
         {error && <div className="alert alert-error">{error}</div>}
-        {success && (
-          <div className="alert alert-success">
-            ¡Registro exitoso! Ya puedes iniciar sesión.
-          </div>
-        )}
 
-        <form onSubmit={handleSignUp}>
+        <form onSubmit={handleRegister}>
           <div className="form-group">
-            <label className="form-label">Nombre Completo</label>
+            <label className="form-label">Nombre completo</label>
             <input
               type="text"
               className="form-input"
@@ -85,10 +77,35 @@ export default function Register() {
               className="form-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              minLength={6}
+              placeholder="Mínimo 6 caracteres"
               required
+              minLength={6}
             />
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label className="form-label">Peso (kg) <span className="text-light">(Opcional)</span></label>
+              <input
+                type="number"
+                step="0.1"
+                className="form-input"
+                value={peso}
+                onChange={(e) => setPeso(e.target.value)}
+                placeholder="75.0"
+              />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label className="form-label">Estatura (m) <span className="text-light">(Opcional)</span></label>
+              <input
+                type="number"
+                step="0.01"
+                className="form-input"
+                value={estatura}
+                onChange={(e) => setEstatura(e.target.value)}
+                placeholder="1.75"
+              />
+            </div>
           </div>
 
           <button
@@ -96,7 +113,7 @@ export default function Register() {
             className="btn btn-primary"
             disabled={loading}
           >
-            {loading ? 'Creando cuenta...' : 'Registrarse'}
+            {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </button>
         </form>
 

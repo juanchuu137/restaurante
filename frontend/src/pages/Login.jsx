@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { supabase } from '../services/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import { Link, Navigate } from 'react-router-dom'
 
@@ -8,26 +7,26 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const { user } = useAuth()
+  const { user, login } = useAuth()
 
   const handleLogin = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (error) {
-      setError(error.message)
+    try {
+      await login(email, password)
+    } catch (err) {
+      setError(err.message || 'Error al iniciar sesión')
     }
     setLoading(false)
   }
 
-  // Si ya está logueado, redirigir al dashboard
+  // Si ya está logueado, redirigir según rol
   if (user) {
+    if (user.rol === 'ADMIN') {
+      return <Navigate to="/admin" replace />
+    }
     return <Navigate to="/dashboard" replace />
   }
 
