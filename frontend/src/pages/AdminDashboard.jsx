@@ -7,6 +7,7 @@ import ProductoForm from '../components/ProductoForm'
 export default function AdminDashboard() {
   const { user, logout } = useAuth()
   const [productos, setProductos] = useState([])
+  const [pendingOrders, setPendingOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
@@ -28,9 +29,30 @@ export default function AdminDashboard() {
     setLoading(false)
   }
 
+  const fetchPendingOrders = async () => {
+    try {
+      const data = await api.get('/api/admin/pedidos?estado=PENDIENTE')
+      setPendingOrders(data)
+    } catch (err) {
+      console.error('Error al cargar pedidos pendientes:', err)
+    }
+  }
+
   useEffect(() => {
     fetchProductos()
+    fetchPendingOrders()
   }, [])
+
+  const handleUpdateOrderStatus = async (orderId, nuevoEstado) => {
+    try {
+      await api.patch(`/api/admin/pedidos/${orderId}/estado`, { estado: nuevoEstado })
+      showSuccess('Estado del pedido actualizado')
+      fetchPendingOrders()
+      fetchProductos()
+    } catch (err) {
+      setError(err.message || 'Error actualizando estado')
+    }
+  }
 
   const showSuccess = (msg) => {
     setSuccessMsg(msg)
@@ -101,6 +123,45 @@ export default function AdminDashboard() {
             + Nuevo Producto
           </button>
         </div>
+
+        {pendingOrders.length > 0 && (
+          <div className="alert alert-info admin-pending-orders">
+            <strong>Pedidos pendientes: {pendingOrders.length}</strong>
+            <span style={{ marginLeft: 12 }}>
+              Hay pedidos nuevos que necesitan revisión.
+            </span>
+            <div className="pending-orders-list">
+              <table className="admin-table" style={{ marginTop: 12 }}>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingOrders.map((o) => (
+                    <tr key={o.id}>
+                      <td className="product-name">{String(o.id).slice(0, 8)}</td>
+                      <td>{new Date(o.fecha).toLocaleString()}</td>
+                      <td>
+                        {o.items.map((it) => `${it.nombre}×${it.cantidad}`).join(', ')}
+                      </td>
+                      <td>${o.total?.toFixed(2)}</td>
+                      <td>
+                        <button className="btn btn-primary" onClick={() => handleUpdateOrderStatus(o.id, 'REALIZADO')}>
+                          Marcar Realizado
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {successMsg && <div className="alert alert-success">{successMsg}</div>}
         {error && <div className="alert alert-error">{error}</div>}

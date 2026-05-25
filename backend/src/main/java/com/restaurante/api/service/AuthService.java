@@ -59,11 +59,14 @@ public class AuthService {
     @Transactional(readOnly = true)
     public AuthResponse login(LoginRequest request) {
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
-                .filter(Usuario::isActivo)
                 .orElseThrow(() -> new CredencialesInvalidasException("Credenciales inválidas"));
 
-        if (!passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash())) {
+        if (!usuario.isActivo()) {
             throw new CredencialesInvalidasException("Credenciales inválidas");
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), usuario.getPasswordHash())) {
+            throw new CredencialesInvalidasException("Contraseña inválida");
         }
 
         // Obtener nombre según el rol

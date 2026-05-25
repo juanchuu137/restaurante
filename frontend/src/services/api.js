@@ -12,7 +12,7 @@ async function request(endpoint, options = {}) {
     ...options.headers,
   };
 
-  if (token) {
+  if (token && !endpoint.startsWith('/api/auth/')) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 

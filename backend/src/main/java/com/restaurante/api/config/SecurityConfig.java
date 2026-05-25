@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 // Rutas de administración: solo usuarios con rol ADMIN
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                // Catálogo de productos: accesible por clientes autenticados
+                .requestMatchers("/api/productos/**").hasRole("CLIENTE")
                 // Datos del cliente: solo usuarios con rol CLIENTE
                 .requestMatchers("/api/clientes/**").hasRole("CLIENTE")
                 // Ruta de prueba abierta (puede eliminarse en producción)
