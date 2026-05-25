@@ -15,8 +15,8 @@ export default function Dashboard() {
   const [pedidoExitoso, setPedidoExitoso] = useState(null)
   const [busqueda, setBusqueda] = useState('')
 
-  if (!user) return <Navigate to="/login" replace />
-  if (user.rol === 'ADMIN') return <Navigate to="/admin" replace />
+  // if (!user) return <Navigate to="/login" replace />
+  // if (user.rol === 'ADMIN') return <Navigate to="/admin" replace />
 
   useEffect(() => {
     const cargarProductos = async () => {
