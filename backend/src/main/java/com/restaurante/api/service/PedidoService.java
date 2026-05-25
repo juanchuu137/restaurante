@@ -95,6 +95,8 @@ public class PedidoService {
             detalle.setId(UUID.randomUUID());
             detalle.setPedido(null);
             detalle.setProducto(producto);
+            detalle.setNombreProducto(producto.getNombre());
+            detalle.setPrecioUnitario(precioUnitario);
             detalle.setCantidad(cantidad);
             detalles.add(detalle);
         }
@@ -156,13 +158,19 @@ public class PedidoService {
     private PedidoResponse toResponse(Pedido pedido) {
         List<PedidoItemResponse> items = pedido.getDetalles().stream()
                 .map(detalle -> {
-                    BigDecimal unitario = detalle.getProducto().getPrecio() != null
+                    String nombre = detalle.getProducto() != null
+                            ? detalle.getProducto().getNombre()
+                            : detalle.getNombreProducto();
+                    BigDecimal unitario = detalle.getPrecioUnitario() != null
+                            ? detalle.getPrecioUnitario()
+                            : detalle.getProducto() != null && detalle.getProducto().getPrecio() != null
                             ? detalle.getProducto().getPrecio()
                             : BigDecimal.ZERO;
                     BigDecimal subtotal = unitario.multiply(BigDecimal.valueOf(detalle.getCantidad()));
+                    UUID productoId = detalle.getProducto() != null ? detalle.getProducto().getId() : null;
                     return new PedidoItemResponse(
-                            detalle.getProducto().getId(),
-                            detalle.getProducto().getNombre(),
+                            productoId,
+                            nombre,
                             detalle.getCantidad(),
                             unitario,
                             subtotal

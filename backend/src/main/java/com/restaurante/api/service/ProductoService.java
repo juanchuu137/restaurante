@@ -1,23 +1,27 @@
 package com.restaurante.api.service;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.restaurante.api.dto.ProductoRequest;
 import com.restaurante.api.dto.ProductoResponse;
 import com.restaurante.api.model.InformacionNutricional;
 import com.restaurante.api.model.Producto;
+import com.restaurante.api.repository.DetallePedidoRepository;
 import com.restaurante.api.repository.ProductoRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ProductoService {
 
     private final ProductoRepository productoRepository;
+    private final DetallePedidoRepository detallePedidoRepository;
 
     /**
      * Lista todos los productos con su información nutricional.
@@ -45,7 +49,8 @@ public class ProductoService {
         Producto producto = new Producto();
         producto.setNombre(request.getNombre());
         producto.setPrecio(request.getPrecio());
-        producto.setStock(request.getStock() != null ? request.getStock() : 0);
+        Integer stock = request.getStock();
+        producto.setStock(stock != null ? stock : 0);
 
         InformacionNutricional info = new InformacionNutricional();
         info.setCalorias(request.getCalorias());
@@ -107,6 +112,8 @@ public class ProductoService {
         if (!productoRepository.existsById(id)) {
             throw new RuntimeException("Producto no encontrado con id: " + id);
         }
+
+        detallePedidoRepository.clearProductoReference(id);
         productoRepository.deleteById(id);
     }
 
