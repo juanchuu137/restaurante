@@ -5,9 +5,9 @@ spring:
     name: RestauranteApi
   datasource:
     # Supabase (Postgres) connection
-    url: ${SUPABASE_DB_URL:jdbc:postgresql://db.pdvcqrvgqlvondifioas.supabase.co:5432/postgres}
-    username: ${SUPABASE_DB_USERNAME:postgres}
-    password: ${SUPABASE_DB_PASSWORD:LMkh684WymLV3t&}
+    url: ${SUPABASE_DB_URL:jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres}
+    username: postgres.pdvcqrvgqlvondifioas
+    password: LMkh684WymLV3t&
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
