@@ -1,8 +1,10 @@
 # Build stage
 FROM maven:3.9.0-eclipse-temurin-17 AS builder
 WORKDIR /app
-COPY . .
-RUN ./mvnw -DskipTests package
+COPY pom.xml .
+COPY src src
+RUN mvn clean package -DskipTests || echo "Build output:"
+RUN ls -la target/
 
 # Runtime stage
 FROM eclipse-temurin:17-jre

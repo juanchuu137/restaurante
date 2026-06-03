@@ -1,6 +1,7 @@
 [build]
 builder = "dockerfile"
-dockerfilePath = "backend/Dockerfile"
+dockerfilePath = "./backend/Dockerfile"
+context = "./backend"
 
 [deploy]
-startCommand = "java -jar target/api-0.0.1-SNAPSHOT.jar"
+startCommand = "java -jar app.jar"
