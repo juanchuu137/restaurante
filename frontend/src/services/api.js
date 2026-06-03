@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'restaurante-production-1e75.up.railway.app';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://restaurante-production-1e75.up.railway.app';
 
 /**
  * Helper centralizado para peticiones HTTP al backend.
