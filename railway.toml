@@ -1,0 +1,6 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "backend/Dockerfile"
+
+[deploy]
+startCommand = "java -jar target/api-0.0.1-SNAPSHOT.jar"
