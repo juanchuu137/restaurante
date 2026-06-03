@@ -1,13 +1,13 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
 spring:
   application:
     name: RestauranteApi
   datasource:
     # Supabase (Postgres) connection
     url: ${SUPABASE_DB_URL:jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres}
-    username: postgres.pdvcqrvgqlvondifioas
-    password: "LMkh684WymLV3t&"
+    username: ${SUPABASE_DB_USER:postgres.pdvcqrvgqlvondifioas}
+    password: ${SUPABASE_DB_PASSWORD:LMkh684WymLV3t&}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
