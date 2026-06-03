@@ -12,6 +12,15 @@ export default function AdminDashboard() {
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState([])
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchError, setSearchError] = useState(null)
+  const [selectedImportProduct, setSelectedImportProduct] = useState(null)
+  const [importPrice, setImportPrice] = useState('')
+  const [importStock, setImportStock] = useState('')
+  const [importLoading, setImportLoading] = useState(false)
+  const [importError, setImportError] = useState(null)
   const [successMsg, setSuccessMsg] = useState(null)
 
   if (!user) return <Navigate to="/login" replace />
@@ -36,6 +45,69 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error('Error al cargar pedidos pendientes:', err)
     }
+  }
+
+  const searchOpenFoodFacts = async () => {
+    if (!searchQuery.trim()) {
+      setSearchError('Ingresa un término de búsqueda')
+      return
+    }
+
+    setSearchLoading(true)
+    setSearchError(null)
+    setSearchResults([])
+    try {
+      const resultados = await api.get(`/api/admin/productos/openfoodfacts/buscar?query=${encodeURIComponent(searchQuery.trim())}`)
+      setSearchResults(resultados)
+    } catch (err) {
+      setSearchError(err.message || 'Error al buscar en OpenFoodFacts')
+    }
+    setSearchLoading(false)
+  }
+
+  const handleSelectImport = async (product) => {
+    setImportLoading(true)
+    setImportError(null)
+    try {
+      const detalle = await api.get(`/api/admin/productos/openfoodfacts/${encodeURIComponent(product.code)}`)
+      setSelectedImportProduct(detalle)
+      setImportPrice('')
+      setImportStock('')
+    } catch (err) {
+      setImportError(err.message || 'Error al obtener detalle del producto')
+    }
+    setImportLoading(false)
+  }
+
+  const handleImportProduct = async () => {
+    if (!selectedImportProduct) return
+    if (!importPrice || Number(importPrice) <= 0) {
+      setImportError('Ingresa un precio válido')
+      return
+    }
+    if (!importStock || Number(importStock) < 0) {
+      setImportError('Ingresa un stock válido')
+      return
+    }
+
+    setImportLoading(true)
+    setImportError(null)
+    try {
+      await api.post('/api/admin/productos/openfoodfacts', {
+        code: selectedImportProduct.code,
+        nombre: selectedImportProduct.productName,
+        precio: Number(importPrice),
+        stock: Number(importStock),
+      })
+      showSuccess('Producto importado desde OpenFoodFacts')
+      setSelectedImportProduct(null)
+      setSearchResults([])
+      setSearchQuery('')
+      fetchProductos()
+    } catch (err) {
+      setImportError(err.message || 'Error al importar el producto')
+    }
+    setImportLoading(false)
   }
 
   useEffect(() => {
@@ -123,6 +195,63 @@ export default function AdminDashboard() {
             + Nuevo Producto
           </button>
         </div>
+
+        <section className="openfoodfacts-search">
+          <div className="search-panel">
+            <h3>Buscar en OpenFoodFacts</h3>
+            <div className="search-row">
+              <input
+                className="form-input"
+                type="text"
+                placeholder="Buscar alimento..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button className="btn btn-primary" onClick={searchOpenFoodFacts} disabled={searchLoading}>
+                {searchLoading ? 'Buscando...' : 'Buscar'}
+              </button>
+            </div>
+            {searchError && <div className="alert alert-error">{searchError}</div>}
+          </div>
+
+          {searchResults.length > 0 && (
+            <div className="search-results">
+              <h4>Resultados</h4>
+              <div className="results-table">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Imagen</th>
+                      <th>Nombre</th>
+                      <th>Marca</th>
+                      <th>Código</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchResults.map((product) => (
+                      <tr key={product.code}>
+                        <td>
+                          {product.imageUrl ? (
+                            <img src={product.imageUrl} alt={product.productName} className="result-thumb" />
+                          ) : '—'}
+                        </td>
+                        <td>{product.productName || product.genericName || 'Sin nombre'}</td>
+                        <td>{product.brands || '—'}</td>
+                        <td className="result-code">{product.code}</td>
+                        <td>
+                          <button className="btn btn-primary" style={{ fontWeight: 'bold' }} onClick={() => handleSelectImport(product)}>
+                            Importar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </section>
 
         {pendingOrders.length > 0 && (
           <div className="alert alert-info admin-pending-orders">
@@ -243,6 +372,66 @@ export default function AdminDashboard() {
           onSave={handleUpdate}
           onCancel={() => setEditingProduct(null)}
         />
+      )}
+
+      {selectedImportProduct && (
+        <div className="modal-overlay" onClick={() => setSelectedImportProduct(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Importar producto desde OpenFoodFacts</h3>
+              <button className="modal-close" onClick={() => setSelectedImportProduct(null)}>&times;</button>
+            </div>
+            <div className="modal-body">
+              {selectedImportProduct.imageUrl && (
+                <div className="modal-image">
+                  <img src={selectedImportProduct.imageUrl} alt={selectedImportProduct.productName} />
+                </div>
+              )}
+              <p><strong>Nombre:</strong> {selectedImportProduct.productName}</p>
+              <p><strong>Marca:</strong> {selectedImportProduct.brands || 'No disponible'}</p>
+              <p><strong>Código:</strong> {selectedImportProduct.code}</p>
+              <p><strong>Porción:</strong> {selectedImportProduct.servingSize || 'No disponible'}</p>
+              <div className="nutrition-grid">
+                <div><strong>Calorías:</strong> {selectedImportProduct.calorias ?? '—'}</div>
+                <div><strong>Proteínas:</strong> {selectedImportProduct.proteinas ?? '—'}</div>
+                <div><strong>Grasas:</strong> {selectedImportProduct.grasas ?? '—'}</div>
+                <div><strong>Carbohidratos:</strong> {selectedImportProduct.carbohidratos ?? '—'}</div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Precio ($)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className="form-input"
+                    value={importPrice}
+                    onChange={(e) => setImportPrice(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Stock</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="form-input"
+                    value={importStock}
+                    onChange={(e) => setImportStock(e.target.value)}
+                  />
+                </div>
+              </div>
+              {importError && <div className="alert alert-error">{importError}</div>}
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={() => setSelectedImportProduct(null)}>
+                Cancelar
+              </button>
+              <button className="btn btn-primary" onClick={handleImportProduct} disabled={importLoading}>
+                {importLoading ? 'Importando...' : 'Importar producto'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

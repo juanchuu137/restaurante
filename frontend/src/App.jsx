@@ -6,7 +6,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
-import './index.css'
+import './App.css'
 
 function App() {
   return (

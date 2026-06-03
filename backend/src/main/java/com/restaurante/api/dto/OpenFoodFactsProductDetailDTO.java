@@ -1,7 +1,6 @@
 package com.restaurante.api.dto;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,12 +9,13 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductoResponse {
-    private UUID id;
-    private String nombre;
-    private BigDecimal precio;
-    private Integer stock;
-    private String imagenUrl;
+public class OpenFoodFactsProductDetailDTO {
+    private String code;
+    private String productName;
+    private String genericName;
+    private String brands;
+    private String imageUrl;
+    private String servingSize;
     private BigDecimal calorias;
     private BigDecimal proteinas;
     private BigDecimal grasas;

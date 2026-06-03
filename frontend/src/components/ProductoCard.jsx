@@ -13,10 +13,18 @@ export default function ProductoCard({ producto }) {
         <span className="producto-card__badge">{cantidad}</span>
       )}
 
-      <div className="producto-card__header">
-        <div className="producto-card__emoji">
-          {getEmoji(producto.nombre)}
+      {producto.imagenUrl ? (
+        <div className="producto-card__image-wrap">
+          <img src={producto.imagenUrl} alt={producto.nombre} className="producto-card__image" />
         </div>
+      ) : null}
+
+      <div className="producto-card__body">
+        {!producto.imagenUrl && (
+          <div className="producto-card__header">
+            <div className="producto-card__emoji">{getEmoji(producto.nombre)}</div>
+          </div>
+        )}
         <div className="producto-card__info">
           <h3 className="producto-card__nombre">{producto.nombre}</h3>
           <span className={`producto-card__stock ${sinStock ? 'stock-empty' : 'stock-available'}`}>

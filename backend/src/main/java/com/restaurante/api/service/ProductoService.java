@@ -51,6 +51,7 @@ public class ProductoService {
         producto.setPrecio(request.getPrecio());
         Integer stock = request.getStock();
         producto.setStock(stock != null ? stock : 0);
+        producto.setImagenUrl(request.getImagenUrl());
 
         InformacionNutricional info = new InformacionNutricional();
         info.setCalorias(request.getCalorias());
@@ -76,6 +77,9 @@ public class ProductoService {
         producto.setNombre(request.getNombre());
         producto.setPrecio(request.getPrecio());
         producto.setStock(request.getStock() != null ? request.getStock() : producto.getStock());
+        if (request.getImagenUrl() != null) {
+            producto.setImagenUrl(request.getImagenUrl());
+        }
 
         InformacionNutricional info = producto.getInformacionNutricional();
         if (info == null) {
@@ -127,6 +131,7 @@ public class ProductoService {
                 producto.getNombre(),
                 producto.getPrecio(),
                 producto.getStock(),
+                producto.getImagenUrl(),
                 info != null ? info.getCalorias() : null,
                 info != null ? info.getProteinas() : null,
                 info != null ? info.getGrasas() : null,

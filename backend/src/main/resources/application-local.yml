@@ -2,15 +2,12 @@ spring:
   datasource:
     url: ${SUPABASE_DB_URL:jdbc:postgresql://db.pdvcqrvgqlvondifioas.supabase.co:5432/postgres}
     username: ${SUPABASE_DB_USERNAME:postgres}
-    password: ${SUPABASE_DB_PASSWORD:LMkh684WymLV3t&}
+    password: ${SUPABASE_DB_PASSWORD:"LMkh684WymLV3t&"}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
 
 app:
   jwt:

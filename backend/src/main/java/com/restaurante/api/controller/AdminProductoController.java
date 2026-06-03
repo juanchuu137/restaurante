@@ -15,10 +15,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.restaurante.api.dto.AgregarProductoOpenFoodFactsRequest;
+import com.restaurante.api.dto.OpenFoodFactsProductDTO;
+import com.restaurante.api.dto.OpenFoodFactsProductDetailDTO;
 import com.restaurante.api.dto.ProductoRequest;
 import com.restaurante.api.dto.ProductoResponse;
+import com.restaurante.api.service.OpenFoodFactsService;
 import com.restaurante.api.service.ProductoService;
 
 import jakarta.validation.Valid;
@@ -30,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminProductoController {
 
     private final ProductoService productoService;
+    private final OpenFoodFactsService openFoodFactsService;
 
     /**
      * Lista todos los productos.
@@ -96,5 +102,52 @@ public class AdminProductoController {
     public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
         productoService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Busca alimentos en OpenFoodFacts por nombre.
+     */
+    @GetMapping("/openfoodfacts/buscar")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<OpenFoodFactsProductDTO>> buscarEnOpenFoodFacts(@RequestParam String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        List<OpenFoodFactsProductDTO> resultados = openFoodFactsService.buscarProductos(query.trim());
+        return ResponseEntity.ok(resultados);
+    }
+
+    /**
+     * Obtiene los detalles de un alimento en OpenFoodFacts.
+     */
+    @GetMapping("/openfoodfacts/{code}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<OpenFoodFactsProductDetailDTO> obtenerDetalleOpenFoodFacts(@PathVariable String code) {
+        return ResponseEntity.ok(openFoodFactsService.obtenerDetalle(code));
+    }
+
+    /**
+     * Agrega un producto al menú desde OpenFoodFacts.
+     */
+    @PostMapping("/openfoodfacts")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ProductoResponse> agregarDesdeOpenFoodFacts(
+            @Valid @RequestBody AgregarProductoOpenFoodFactsRequest request) {
+        OpenFoodFactsProductDetailDTO detalle = openFoodFactsService.obtenerDetalle(request.getCode());
+
+        ProductoRequest productoRequest = new ProductoRequest();
+        productoRequest.setNombre(request.getNombre() != null && !request.getNombre().isBlank()
+                ? request.getNombre()
+                : detalle.getProductName());
+        productoRequest.setPrecio(request.getPrecio());
+        productoRequest.setStock(request.getStock());
+        productoRequest.setImagenUrl(detalle.getImageUrl());
+        productoRequest.setCalorias(detalle.getCalorias());
+        productoRequest.setProteinas(detalle.getProteinas());
+        productoRequest.setGrasas(detalle.getGrasas());
+        productoRequest.setCarbohidratos(detalle.getCarbohidratos());
+
+        ProductoResponse response = productoService.crear(productoRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

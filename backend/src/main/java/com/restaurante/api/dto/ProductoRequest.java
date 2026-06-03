@@ -10,6 +10,7 @@ public class ProductoRequest {
     private String nombre;
     private BigDecimal precio;
     private Integer stock;
+    private String imagenUrl;
 
     @NotNull(message = "Las calorías son obligatorias")
     private BigDecimal calorias;
